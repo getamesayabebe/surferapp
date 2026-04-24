@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <link rel="icon" type="image/png" href="222.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Surfer Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="authentication.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #000000;
+        }
+
+        .glass-card {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body class="text-slate-200 antialiased min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="flex items-center justify-center gap-3 mb-4">
+                <img src="222.png" alt="Surfer Trading logo" class="w-12 h-12 rounded-xl bg-indigo-600/20 p-1 shadow-lg shadow-indigo-500/20" />
+                <span class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Surfer Trading</span>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Welcome Back</h1>
+            <p class="text-slate-400">Sign in to your account</p>
+        </div>
+
+        <!-- Sign In Form -->
+        <div class="glass-card rounded-2xl p-8 shadow-2xl">
+            <form id="signinForm" class="space-y-6">
+                <div>
+                    <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Email Address</label>
+                    <input type="email" id="email" name="email" required
+                        class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                </div>
+
+                <div>
+                    <label for="password" class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                    <input type="password" id="password" name="password" required
+                        class="w-full px-4 py-3 bg-slate-800/50 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all">
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <label class="flex items-center">
+                        <input type="checkbox" id="rememberMe" class="rounded border-slate-700 text-indigo-600 focus:ring-indigo-500 focus:ring-2">
+                        <span class="ml-2 text-sm text-slate-400">Remember me</span>
+                    </label>
+                    <button type="button" id="forgotPasswordBtn" class="text-sm text-indigo-400 hover:text-indigo-300 transition-colors">Forgot password?</button>
+                </div>
+
+                <button type="submit"
+                    class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 px-4 rounded-lg transition-all shadow-lg shadow-indigo-600/20 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="mt-6 text-center">
+                <p class="text-slate-400">
+                    Don't have an account?
+                    <a href="signup.html" class="text-indigo-400 hover:text-indigo-300 font-medium transition-colors">Sign Up</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="text-center mt-6">
+            <a href="index.html" class="text-slate-400 hover:text-white transition-colors text-sm">
+                ← Back to Home
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('signinForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                auth.showMessage('Please fill in all fields', 'error');
+                return;
+            }
+
+            // Disable button
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Signing In...';
+
+            // Sign in
+            const result = await auth.signIn(email, password);
+
+            // Re-enable button
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Sign In';
+
+            if (result.success) {
+                // Clear form
+                e.target.reset();
+                // Redirect to dashboard
+                window.location.href = 'dashboard.html';
+            }
+        });
+
+        document.getElementById('forgotPasswordBtn').addEventListener('click', () => {
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                auth.showMessage('Please enter your email address first', 'error');
+                return;
+            }
+            auth.resetPassword(email);
+        });
+    </script>
+</body>
+
+</html>

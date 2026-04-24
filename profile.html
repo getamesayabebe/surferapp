@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account | Surfer Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="authentication.js"></script>
+</head>
+<body class="min-h-screen bg-black text-slate-100 flex items-center justify-center p-6">
+    <div class="w-full max-w-lg bg-black border border-slate-800 rounded-2xl p-8 shadow-2xl">
+        <h1 class="text-3xl font-black mb-2">My Account</h1>
+        <p class="text-slate-400 mb-6">Edit your account name and profile photo.</p>
+
+        <div class="flex items-center gap-4 mb-6">
+            <img id="avatarPreview" src="" alt="Profile photo" class="w-16 h-16 rounded-full object-cover border border-slate-700 bg-slate-800">
+            <div>
+                <div id="accountEmail" class="font-semibold text-slate-200"></div>
+                <div class="text-slate-400 text-sm">Signed in account</div>
+            </div>
+        </div>
+
+        <form id="profileForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-1">Account Name</label>
+                <input id="name" type="text" required class="w-full px-4 py-3 rounded-xl bg-black border border-slate-800 focus:border-indigo-500 outline-none" placeholder="Your name">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-1">Photo URL</label>
+                <input id="photo" type="text" class="w-full px-4 py-3 rounded-xl bg-black border border-slate-800 focus:border-indigo-500 outline-none" placeholder="https://example.com/photo.jpg">
+            </div>
+            <div>
+                <label class="block text-sm font-semibold text-slate-300 mb-1">Upload Photo</label>
+                <input id="photoFile" type="file" accept="image/*" class="w-full px-3 py-2 rounded-xl bg-black border border-slate-800 text-sm file:mr-3 file:px-3 file:py-2 file:border-0 file:rounded-lg file:bg-indigo-600 file:text-white file:font-semibold hover:file:bg-indigo-500">
+                <p class="text-xs text-slate-500 mt-1">Max recommended size: 3MB image.</p>
+            </div>
+
+            <button id="saveBtn" type="submit" class="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 font-bold transition-colors">
+                Save Profile
+            </button>
+        </form>
+
+        <p id="message" class="mt-4 text-sm"></p>
+
+        <div class="mt-6 flex items-center justify-between">
+            <a href="index.html" class="text-indigo-400 hover:underline text-sm">Back to Home</a>
+            <a id="desktopAdminBtn" href="admin.html" class="hidden text-slate-400 hover:text-white text-sm">Admin</a>
+            <button id="signOutBtn" type="button" class="text-red-400 hover:underline text-sm">Sign Out</button>
+        </div>
+    </div>
+
+    <script>
+        const profileForm = document.getElementById('profileForm');
+        const message = document.getElementById('message');
+        const saveBtn = document.getElementById('saveBtn');
+        const signOutBtn = document.getElementById('signOutBtn');
+        const nameInput = document.getElementById('name');
+        const photoInput = document.getElementById('photo');
+        const photoFileInput = document.getElementById('photoFile');
+        const avatarPreview = document.getElementById('avatarPreview');
+        const accountEmail = document.getElementById('accountEmail');
+        let uploadedPhotoDataUrl = '';
+
+        function showMessage(text, ok) {
+            message.textContent = text;
+            message.className = `mt-4 text-sm ${ok ? 'text-emerald-400' : 'text-red-400'}`;
+        }
+
+        function setAvatar(photoUrl, fallbackName) {
+            if (photoUrl) {
+                avatarPreview.src = photoUrl;
+            } else {
+                const initial = (fallbackName || 'A').trim().charAt(0).toUpperCase() || 'A';
+                avatarPreview.src = `https://placehold.co/200x200/4f46e5/ffffff?text=${encodeURIComponent(initial)}`;
+            }
+        }
+
+        photoInput.addEventListener('input', () => {
+            uploadedPhotoDataUrl = '';
+            setAvatar(photoInput.value.trim(), nameInput.value);
+        });
+
+        photoFileInput.addEventListener('change', () => {
+            const file = photoFileInput.files && photoFileInput.files[0];
+            if (!file) return;
+
+            if (!file.type.startsWith('image/')) {
+                showMessage('Please choose an image file.', false);
+                photoFileInput.value = '';
+                return;
+            }
+
+            if (file.size > 3 * 1024 * 1024) {
+                showMessage('Image is too large. Please choose under 3MB.', false);
+                photoFileInput.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                uploadedPhotoDataUrl = String(reader.result || '');
+                photoInput.value = '';
+                setAvatar(uploadedPhotoDataUrl, nameInput.value);
+                showMessage('Photo uploaded. Click Save Profile to keep it.', true);
+            };
+            reader.onerror = () => {
+                showMessage('Could not read selected image.', false);
+            };
+            reader.readAsDataURL(file);
+        });
+
+        async function loadProfile() {
+            try {
+                if (window.auth && window.auth.ready) {
+                    await window.auth.ready;
+                }
+
+                if (!window.auth || !window.auth.isAuthenticated()) {
+                    window.location.href = 'signin.html';
+                    return;
+                }
+                const user = window.auth.getCurrentUser();
+                accountEmail.textContent = user.email || '';
+                nameInput.value = user.user_metadata?.full_name || '';
+                photoInput.value = user.user_metadata?.avatar_url || '';
+                setAvatar(user.user_metadata?.avatar_url, user.user_metadata?.full_name || user.email);
+            } catch (err) {
+                console.error('loadProfile error:', err);
+                showMessage('Could not load profile. Please sign in.', false);
+            }
+        }
+
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'Saving...';
+
+            const name = nameInput.value.trim();
+            const photo = uploadedPhotoDataUrl || photoInput.value.trim();
+
+            try {
+                if (!window.auth || !window.auth.isAuthenticated()) {
+                    showMessage('Not signed in.', false);
+                    return;
+                }
+
+                if (!window.supabaseClient) {
+                    showMessage('Supabase client not available.', false);
+                    return;
+                }
+
+                // Update user metadata in Supabase Auth
+                const { data, error } = await window.supabaseClient.auth.updateUser({ data: { full_name: name, avatar_url: photo } });
+                if (error) {
+                    showMessage(error.message || 'Could not update profile.', false);
+                    return;
+                }
+                setAvatar(photo, name);
+                uploadedPhotoDataUrl = photo;
+                showMessage('Profile updated successfully.', true);
+            } catch (err) {
+                showMessage('Profile update failed.', false);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Profile';
+            }
+        });
+
+        signOutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try {
+                if (window.auth) {
+                    await window.auth.signOut();
+                } else {
+                    window.location.href = 'signin.html';
+                }
+            } catch (err) {
+                console.error('Sign out error:', err);
+                window.location.href = 'signin.html';
+            }
+        });
+
+        loadProfile();
+    </script>
+</body>
+</html>

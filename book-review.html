@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <link rel="icon" type="image/png" href="222.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Reviews | Surfer Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #000000;
+        }
+
+        .glass-nav {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .book-card:hover .book-cover {
+            transform: translateY(-10px) rotate(2deg);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .book-cover {
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .mobile-menu {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+
+        .mobile-menu.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="text-slate-200 antialiased selection:bg-indigo-500/30 selection:text-indigo-200">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-[100] glass-nav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20 items-center">
+                <a href="index.html" class="flex items-center gap-3">
+                    <img src="222.png" alt="Surfer logo" class="w-10 h-10 rounded-xl bg-indigo-600/20 p-1 shadow-lg shadow-indigo-500/20" />
+                    <span class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Surfer Trading</span>
+                </a>
+                
+                <div class="hidden md:flex items-center space-x-10 text-sm font-semibold tracking-wide">
+                    <a href="index.html" class="text-slate-400 hover:text-white transition-colors">Home</a>
+                    <a href="#reviews" class="text-slate-400 hover:text-white transition-colors">Reviews</a>
+                    <a href="#details" class="text-slate-400 hover:text-white transition-colors">Why Read</a>
+                    <a id="desktopAdminBtn" href="admin.html" class="hidden text-slate-400 hover:text-white transition-colors">Admin</a>
+                    <a href="see-books.html" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-2.5 rounded-full transition-all shadow-lg shadow-indigo-600/20 active:scale-95">
+                        SEE Books
+                    </a>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button id="menuBtn" class="md:hidden p-2 text-slate-400 hover:text-white transition-colors">
+                    <svg id="menuIcon" xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobileMenu" class="md:hidden absolute top-full left-0 w-full bg-slate-900/95 border-b border-slate-800 p-6 space-y-4 mobile-menu pointer-events-none">
+            <a href="index.html" class="block text-lg font-medium text-slate-300 hover:text-white">Home</a>
+            <a href="#reviews" class="block text-lg font-medium text-slate-300 hover:text-white">Reviews</a>
+            <a href="#details" class="block text-lg font-medium text-slate-300 hover:text-white">Why Read</a>
+            <a id="mobileAdminBtn" href="admin.html" class="hidden text-lg font-medium text-slate-300 hover:text-white">Admin</a>
+            <a href="see-books.html" class="block bg-indigo-600 text-white text-center py-3 rounded-xl font-bold">SEE Books</a>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <header class="pt-40 pb-20 px-4 text-center">
+        <div class="max-w-4xl mx-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-black uppercase tracking-widest mb-6">
+                ForexPro Reading List
+            </div>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-8 leading-tight bg-clip-text text-transparent bg-gradient-to-b from-white to-slate-400">
+                Essential <span class="text-indigo-500">Forex</span> Books for Traders
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 mb-12 max-w-2xl mx-auto leading-relaxed">
+                Dive into the best books on market structure, risk management, and trading psychology chosen for serious currency traders.
+            </p>
+        </div>
+    </header>
+
+    <main class="pb-32 px-4">
+        <!-- Reviews Grid -->
+        <section id="reviews" class="max-w-7xl mx-auto py-12">
+            <div class="grid gap-12 lg:grid-cols-3">
+                <!-- Book 1 -->
+                <article class="group book-card">
+                    <div class="relative mb-8 flex justify-center">
+                        <div class="book-cover w-48 h-64 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-900 shadow-2xl flex flex-col items-center justify-center p-6 text-center border border-white/10 overflow-hidden relative">
+                            <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+                            <div class="text-indigo-200 text-xs font-bold uppercase tracking-widest mb-2 opacity-60">Beginner Guide</div>
+                            <h3 class="text-white text-lg font-black leading-tight">Currency Trading for Dummies</h3>
+                            <div class="mt-auto w-10 h-1 bg-white/30 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <span class="inline-flex px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-xs font-bold uppercase tracking-widest mb-4">Mechanics</span>
+                        <h2 class="text-2xl font-bold mb-4 text-white group-hover:text-indigo-400 transition-colors">Currency Trading Basics</h2>
+                        <p class="text-slate-400 mb-6 leading-relaxed">A practical introduction to FX mechanics, order types, and the fundamentals every trader should master before going live.</p>
+                        <p class="text-slate-500 text-sm italic">"The foundation of execution and risk control."</p>
+                    </div>
+                </article>
+
+                <!-- Book 2 -->
+                <article class="group book-card">
+                    <div class="relative mb-8 flex justify-center">
+                        <div class="book-cover w-48 h-64 rounded-lg bg-gradient-to-br from-purple-600 to-purple-900 shadow-2xl flex flex-col items-center justify-center p-6 text-center border border-white/10 overflow-hidden relative">
+                            <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+                            <div class="text-purple-200 text-xs font-bold uppercase tracking-widest mb-2 opacity-60">Psychology</div>
+                            <h3 class="text-white text-lg font-black leading-tight">Trading in the Zone</h3>
+                            <div class="mt-auto w-10 h-1 bg-white/30 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <span class="inline-flex px-3 py-1 rounded-full bg-purple-500/10 text-purple-400 text-xs font-bold uppercase tracking-widest mb-4">Mindset</span>
+                        <h2 class="text-2xl font-bold mb-4 text-white group-hover:text-purple-400 transition-colors">Mastering the Mental Edge</h2>
+                        <p class="text-slate-400 mb-6 leading-relaxed">Focuses on mindset, discipline, and consistency—key traits for preserving capital in volatile currency markets.</p>
+                        <p class="text-slate-500 text-sm italic">"Essential for decision-making under pressure."</p>
+                    </div>
+                </article>
+
+                <!-- Book 3 -->
+                <article class="group book-card">
+                    <div class="relative mb-8 flex justify-center">
+                        <div class="book-cover w-48 h-64 rounded-lg bg-gradient-to-br from-emerald-600 to-emerald-900 shadow-2xl flex flex-col items-center justify-center p-6 text-center border border-white/10 overflow-hidden relative">
+                            <div class="absolute inset-0 opacity-20 pointer-events-none" style="background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');"></div>
+                            <div class="text-emerald-200 text-xs font-bold uppercase tracking-widest mb-2 opacity-60">Tactical</div>
+                            <h3 class="text-white text-lg font-black leading-tight">Day Trading & Swing Trading</h3>
+                            <div class="mt-auto w-10 h-1 bg-white/30 rounded-full"></div>
+                        </div>
+                    </div>
+                    <div class="text-center md:text-left">
+                        <span class="inline-flex px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-bold uppercase tracking-widest mb-4">Strategy</span>
+                        <h2 class="text-2xl font-bold mb-4 text-white group-hover:text-emerald-400 transition-colors">Strategic FX Frameworks</h2>
+                        <p class="text-slate-400 mb-6 leading-relaxed">Offers tactical setups, chart patterns, and risk-reward frameworks tailored for short-term FX moves.</p>
+                        <p class="text-slate-500 text-sm italic">"Perfect for structured, repeatable systems."</p>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Why Read Section -->
+        <section id="details" class="max-w-7xl mx-auto py-24">
+            <div class="grid gap-12 lg:grid-cols-2">
+                <div class="rounded-3xl bg-slate-900/50 border border-slate-800 p-10 md:p-16 relative overflow-hidden group">
+                    <div class="absolute -top-24 -right-24 w-64 h-64 bg-indigo-600/10 rounded-full blur-[80px] group-hover:bg-indigo-600/20 transition-all duration-700"></div>
+                    <h2 class="text-3xl font-black mb-8 text-white">Why these books matter</h2>
+                    <p class="text-lg text-slate-400 mb-10 leading-relaxed">These titles combine practical execution, market psychology, and risk discipline—three pillars of a winning forex trader portfolio.</p>
+                    <ul class="space-y-6">
+                        <li class="flex gap-4 items-start">
+                            <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 mt-1">
+                                <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                            </div>
+                            <span class="text-slate-300 font-medium">Understand currency drivers and global macro themes.</span>
+                        </li>
+                        <li class="flex gap-4 items-start">
+                            <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 mt-1">
+                                <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                            </div>
+                            <span class="text-slate-300 font-medium">Build the discipline needed to avoid emotional trading errors.</span>
+                        </li>
+                        <li class="flex gap-4 items-start">
+                            <div class="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 mt-1">
+                                <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                            </div>
+                            <span class="text-slate-300 font-medium">Turn theoretical frameworks into reviewable trade routines.</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="rounded-3xl bg-slate-950 border border-slate-800 p-10 md:p-16 flex flex-col justify-center">
+                    <h3 class="text-3xl font-black mb-8 text-white">Recommended Reading Flow</h3>
+                    <div class="space-y-8">
+                        <div class="flex gap-6 items-center">
+                            <div class="text-4xl font-black text-indigo-500/30">01</div>
+                            <div class="text-lg font-bold text-slate-300">Master market structure and execution.</div>
+                        </div>
+                        <div class="h-8 w-px bg-slate-800 ml-6"></div>
+                        <div class="flex gap-6 items-center">
+                            <div class="text-4xl font-black text-indigo-500/30">02</div>
+                            <div class="text-lg font-bold text-slate-300">Sharpen your mental edge and psychology.</div>
+                        </div>
+                        <div class="h-8 w-px bg-slate-800 ml-6"></div>
+                        <div class="flex gap-6 items-center">
+                            <div class="text-4xl font-black text-indigo-500/30">03</div>
+                            <div class="text-lg font-bold text-slate-300">Implement tactical systems and risk sizing.</div>
+                        </div>
+                    </div>
+                    <p class="mt-12 text-slate-500 font-medium leading-relaxed italic border-l-2 border-indigo-500/50 pl-6">
+                        "Use these resources as part of your monthly review routine to stay sharp and adaptable in shifting markets."
+                    </p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-16 bg-slate-950 border-t border-slate-900">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <div class="flex items-center justify-center gap-3 mb-8">
+                <img src="222.png" alt="ForexPro logo" class="w-8 h-8 rounded-lg" />
+                <span class="text-lg font-bold text-white">Surfer Trading</span>
+            </div>
+            <div class="text-slate-600 text-xs font-bold uppercase tracking-[0.2em]">
+                &copy; 2026 Surfer Trading. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const menuIcon = document.getElementById('menuIcon');
+
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('active');
+            mobileMenu.classList.toggle('pointer-events-none');
+            
+            if (mobileMenu.classList.contains('active')) {
+                menuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />';
+            } else {
+                menuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+            }
+        });
+
+        // Close menu on click
+        document.querySelectorAll('#mobileMenu a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+                mobileMenu.classList.add('pointer-events-none');
+                menuIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />';
+            });
+        });
+    </script>
+</body>
+</html>

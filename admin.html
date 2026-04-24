@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page | Surfer Trading</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="authentication.js"></script>
+</head>
+<body class="min-h-screen bg-black text-slate-100 p-6">
+    <div class="max-w-5xl mx-auto">
+        <div class="flex items-center justify-between mb-6">
+            <h1 class="text-3xl font-black">Admin Page</h1>
+            <div class="flex gap-4">
+                <a href="index.html" class="text-indigo-400 hover:underline">Back Home</a>
+                <button id="signOutBtn" class="text-red-400 hover:underline">Sign Out</button>
+            </div>
+        </div>
+        <p class="text-slate-400 mb-6">Manage user accounts (admin only).</p>
+        <p id="message" class="mb-4 text-sm"></p>
+        <div id="list" class="space-y-4"></div>
+    </div>
+
+    <script>
+        const message = document.getElementById('message');
+        const list = document.getElementById('list');
+
+        function showMessage(text, ok) {
+            message.textContent = text;
+            message.className = `mb-4 text-sm ${ok ? 'text-emerald-400' : 'text-red-400'}`;
+        }
+
+        function userCard(user) {
+            const isBanned = user.banned === true;
+            const isAdmin = user.email === 'admin@surfer.com';
+            
+            return `
+                <div class="border border-slate-800 rounded-2xl p-4 bg-slate-900/40">
+                    <div class="flex items-center justify-between gap-4 mb-3">
+                        <div>
+                            <div class="font-semibold">${user.email}</div>
+                            <div class="text-xs text-slate-400">Role: ${isAdmin ? 'Admin' : 'User'} | ${isBanned ? 'Banned' : 'Active'}</div>
+                        </div>
+                        ${user.avatar_url ? `<img src="${user.avatar_url}" alt="user" class="w-10 h-10 rounded-full object-cover border border-slate-700">` : ''}
+                    </div>
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <input data-name="${user.id}" value="${(user.full_name || '').replace(/"/g, '&quot;')}" class="px-3 py-2 rounded-lg bg-black border border-slate-800 focus:border-indigo-500 outline-none" placeholder="Full Name" />
+                        <input data-photo="${user.id}" value="${(user.avatar_url || '').replace(/"/g, '&quot;')}" class="px-3 py-2 rounded-lg bg-black border border-slate-800 focus:border-indigo-500 outline-none" placeholder="Photo URL" />
+                    </div>
+                    <div class="flex gap-3 mt-3">
+                        <button data-save="${user.id}" class="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-semibold">Save</button>
+                        <button data-ban="${user.id}" data-email="${user.email}" data-banned="${isBanned ? '1' : '0'}" class="px-4 py-2 rounded-lg ${isAdmin ? 'bg-slate-700 cursor-not-allowed' : (isBanned ? 'bg-emerald-600 hover:bg-emerald-500' : 'bg-amber-600 hover:bg-amber-500')} font-semibold" ${isAdmin ? 'disabled' : ''}>
+                            ${isBanned ? 'Unban' : 'Ban'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function loadUsers() {
+            try {
+                showMessage('Loading users from database...', true);
+                
+                // Wait for auth to be ready
+                if (window.auth && window.auth.ready) await window.auth.ready;
+                
+                if (!window.auth || !window.auth.isAuthenticated()) {
+                    window.location.href = 'signin.html';
+                    return;
+                }
+
+                const currentUser = window.auth.getCurrentUser();
+                if (currentUser.email !== 'admin@surfer.com') {
+                    showMessage('Only admin can open this page.', false);
+                    list.innerHTML = '';
+                    return;
+                }
+
+                // Fetch directly from Supabase 'profiles' table
+                const { data: profiles, error } = await window.supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    if (error.message.includes('profiles')) {
+                        showMessage('Database table "profiles" is missing.', false);
+                        list.innerHTML = `
+                            <div class="bg-amber-900/20 border border-amber-500/50 p-6 rounded-2xl text-amber-200">
+                                <h3 class="text-xl font-bold mb-3">⚠️ Database Setup Required</h3>
+                                <p class="mb-4">The admin page cannot find the <strong>profiles</strong> table. To fix this:</p>
+                                <ol class="list-decimal list-inside space-y-2 mb-4 text-sm">
+                                    <li>Go to your <strong>Supabase Dashboard</strong></li>
+                                    <li>Open the <strong>SQL Editor</strong></li>
+                                    <li>Click <strong>New Query</strong></li>
+                                    <li>Copy and paste the SQL code below</li>
+                                    <li>Click <strong>Run</strong></li>
+                                </ol>
+                                <pre class="bg-slate-950 p-4 rounded-lg overflow-x-auto text-xs text-indigo-300 border border-slate-800 mb-4">
+-- Run this in Supabase SQL Editor:
+create table public.profiles (
+  id uuid references auth.users on delete cascade primary key,
+  email text unique not null,
+  full_name text,
+  avatar_url text,
+  banned boolean default false,
+  created_at timestamp with time zone default now()
+);
+
+-- Allow everyone to see profiles
+alter table public.profiles enable row level security;
+create policy "Public profiles are viewable by everyone" on public.profiles for select using (true);
+create policy "Admin full access" on public.profiles for all using (true);</pre>
+                                <button onclick="location.reload()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-lg font-bold">I've run the SQL, Refresh Page</button>
+                            </div>
+                        `;
+                    } else {
+                        showMessage(`Error: ${error.message}`, false);
+                    }
+                    return;
+                }
+
+                list.innerHTML = profiles.map(userCard).join('');
+                if (!profiles.length) {
+                    list.innerHTML = '<div class="text-slate-400">No user profiles found. Users must sign in at least once to create a profile.</div>';
+                }
+                showMessage('Admin page ready (Connected to Supabase).', true);
+            } catch (err) {
+                console.error(err);
+                showMessage('Connection to Supabase failed.', false);
+            }
+        }
+
+        list.addEventListener('click', async (e) => {
+            const saveId = e.target.getAttribute('data-save');
+            const banId = e.target.getAttribute('data-ban');
+
+            if (saveId) {
+                const nameInput = list.querySelector(`[data-name="${saveId}"]`);
+                const photoInput = list.querySelector(`[data-photo="${saveId}"]`);
+                try {
+                    showMessage('Updating profile...', true);
+                    const { error } = await window.supabaseClient
+                        .from('profiles')
+                        .update({ 
+                            full_name: nameInput.value.trim(), 
+                            avatar_url: photoInput.value.trim(),
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', saveId);
+
+                    if (error) throw error;
+                    showMessage('User profile updated.', true);
+                    loadUsers();
+                } catch (err) {
+                    showMessage(`Update failed: ${err.message}`, false);
+                }
+            }
+
+            if (banId) {
+                const email = e.target.getAttribute('data-email');
+                const currentlyBanned = e.target.getAttribute('data-banned') === '1';
+                
+                if (!confirm(`${currentlyBanned ? 'Unban' : 'Ban'} ${email}?`)) return;
+
+                try {
+                    showMessage('Updating status...', true);
+                    const { error } = await window.supabaseClient
+                        .from('profiles')
+                        .update({ 
+                            banned: !currentlyBanned,
+                            updated_at: new Date().toISOString()
+                        })
+                        .eq('id', banId);
+
+                    if (error) throw error;
+                    showMessage(currentlyBanned ? 'User unbanned.' : 'User banned.', true);
+                    loadUsers();
+                } catch (err) {
+                    showMessage(`Action failed: ${err.message}`, false);
+                }
+            }
+        });
+
+        loadUsers();
+    </script>
+</body>
+</html>

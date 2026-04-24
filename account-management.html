@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Account Management | Surfer Trading</title>
+    <link rel="icon" type="image/png" href="222.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="authentication.js"></script>
+    <style>
+        body { background-color: #000000; }
+    </style>
+</head>
+<body class="bg-black text-slate-200 antialiased">
+    <div class="max-w-xl mx-auto px-4 py-12">
+        <div class="mb-8">
+            <a href="charts.html" class="inline-flex items-center gap-2 text-slate-400 hover:text-slate-100 transition-colors mb-4 group">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:-translate-x-1 transition-transform"><path d="m15 18-6-6 6-6"/></svg>
+                Back to Chart
+            </a>
+            <div class="flex items-center gap-3">
+                <img src="222.png" alt="Logo" class="w-10 h-10 rounded-xl bg-indigo-600/20 p-1" />
+                <div>
+                    <h1 id="pageTitle" class="text-2xl font-bold leading-none">Demo Account</h1>
+                    <div class="flex gap-1 mt-1">
+                        <button id="modeDemo" class="px-2 py-0.5 rounded text-[8px] font-black uppercase border border-emerald-500 bg-emerald-500/10 text-emerald-500 transition-all">Demo</button>
+                        <button id="modeReal" class="px-2 py-0.5 rounded text-[8px] font-black uppercase border border-slate-700 bg-slate-800/50 text-slate-500 hover:border-rose-500 hover:text-rose-500 transition-all">Real</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="bg-black border border-slate-800 rounded-2xl p-8 shadow-lg">
+            <h2 id="cardTitle" class="text-xl font-bold mb-6">Demo Account</h2>
+
+            <div id="accountInfo" class="mb-6 grid grid-cols-1 gap-3">
+                <div class="text-2xl">
+                    <span id="balanceLabel" class="font-bold text-slate-100">Balance:</span>
+                    <span id="userBalance" class="text-emerald-400 font-bold ml-1">$0.00</span>
+                </div>
+            </div>
+
+            <div class="mb-6 space-y-4">
+                <div>
+                    <label id="amountLabel" class="block text-sm font-medium text-slate-400 mb-1">Amount ($)</label>
+                    <input type="number" id="txAmount" placeholder="0.00" class="w-full bg-black border border-slate-800 rounded-lg px-4 py-2 text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                </div>
+
+                <!-- Real Mode Deposit Networks (Hidden in Demo) -->
+                <div id="realDepositNetworks" class="hidden space-y-4 p-4 bg-black border border-slate-800 rounded-xl">
+                    <label class="block text-sm font-medium text-slate-400 mb-2 uppercase tracking-widest text-[10px]">Select Deposit Network</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button type="button" class="network-btn px-4 py-3 rounded-xl border border-slate-800 bg-black text-xs font-bold text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95 flex flex-col items-center gap-1" data-network="tron">
+                            <span class="text-sm">Tron</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-tighter font-black">TRC20</span>
+                        </button>
+                        <button type="button" class="network-btn px-4 py-3 rounded-xl border border-slate-800 bg-black text-xs font-bold text-slate-400 hover:border-indigo-500 hover:text-indigo-400 transition-all active:scale-95 flex flex-col items-center gap-1" data-network="eth">
+                            <span class="text-sm">Ethereum</span>
+                            <span class="text-[9px] text-slate-500 uppercase tracking-tighter font-black">ERC20</span>
+                        </button>
+                    </div>
+                    
+                    <div id="addressSection" class="hidden space-y-3 pt-2">
+                        <div class="p-3 bg-black rounded-lg border border-slate-800 flex items-center justify-between gap-3 group">
+                            <div class="overflow-hidden">
+                                <div id="addressLabel" class="text-[9px] text-slate-500 font-black uppercase tracking-widest mb-1">Deposit Address (<span id="selectedNetworkName" class="text-indigo-400">TRC20</span>)</div>
+                                <div id="depositAddress" class="text-[11px] font-mono text-slate-300 break-all truncate">TNV8mN5R3v9m...q5v2s7m8</div>
+                                <input id="withdrawAddress" type="text" placeholder="Enter your withdrawal address" class="hidden w-full bg-black text-[11px] font-mono text-slate-300 border-none p-0 focus:ring-0 placeholder-slate-600" />
+                            </div>
+                            <button id="copyAddressBtn" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white rounded-lg transition-colors">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            </button>
+                        </div>
+                        
+                        <!-- Transaction Hash Input for Real Mode -->
+                        <div id="hashInputSection" class="space-y-2 pt-2">
+                            <label class="block text-[9px] text-slate-500 font-black uppercase tracking-widest">Transaction Hash (TXID)</label>
+                            <input type="text" id="txHash" placeholder="Enter the transaction hash/ID" class="w-full bg-black border border-slate-800 rounded-lg px-3 py-2 text-[10px] text-slate-300 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono" />
+                        </div>
+
+                        <p id="networkWarning" class="text-[9px] text-rose-400 font-bold leading-tight px-1 italic">
+                            * Please only send <span id="selectedNetworkWarning" class="uppercase">USDT</span> to this address via the <span id="selectedNetworkName2" class="uppercase font-black">TRC20</span> network.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex gap-3">
+                    <button id="depositBtn" class="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg font-bold text-white transition-colors">Confirm Deposit</button>
+                    <button id="setBalanceBtn" class="hidden flex-1 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-lg font-bold text-white transition-colors">Set Balance</button>
+                    <button id="withdrawBtn" class="flex-1 px-4 py-2 bg-rose-600 hover:bg-rose-500 rounded-lg font-bold text-white transition-colors">Withdraw</button>
+                </div>
+            </div>
+
+            <div class="mb-6">
+                <button id="showHistoryBtn" class="mb-3 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded text-slate-200">Withdrawal / Transaction History</button>
+                <div id="txHistory" style="display:none" class="max-h-48 overflow-auto bg-black p-3 rounded border border-slate-800 text-sm"></div>
+            </div>
+
+            <div class="flex gap-4">
+           
+                <button id="signOutBtn" class="px-4 py-2 bg-rose-600/10 text-rose-500 hover:bg-rose-600 hover:text-white rounded transition-colors font-bold">Sign Out</button>
+            </div>
+        </div>
+    </div>
+    <script>
+        let currentMode = localStorage.getItem('surfer:currentMode') || 'demo';
+
+        // Client-side balance and transaction storage keyed by mode and user id
+        function storageKey(userId) { return `surfer:balance:${currentMode}:${userId}`; }
+        function txKey(userId) { return `surfer:txs:${currentMode}:${userId}`; }
+
+        function formatMoney(n) {
+            return `$${Number(n).toFixed(2)}`;
+        }
+
+        async function ensureAuth() {
+            if (window.auth && window.auth.ready) await window.auth.ready;
+            if (!window.auth || !window.auth.isAuthenticated()) {
+                window.location.href = 'signin.html';
+                throw new Error('Not authenticated');
+            }
+            return window.auth.getCurrentUser();
+        }
+
+        function getBalance(userId) {
+            const v = localStorage.getItem(storageKey(userId));
+            return v ? Number(v) : 0;
+        }
+
+        function setBalance(userId, amount) {
+            localStorage.setItem(storageKey(userId), String(Number(amount)));
+        }
+
+        function getTxs(userId) {
+            const raw = localStorage.getItem(txKey(userId));
+            return raw ? JSON.parse(raw) : [];
+        }
+
+        function addTx(userId, type, amount, balance, status = 'completed') {
+            const txs = getTxs(userId);
+            txs.unshift({ 
+                time: new Date().toISOString(), 
+                type, 
+                amount: Number(amount), 
+                balance: Number(balance),
+                status: status
+            });
+            
+            // Keep history for 1 year (365 days)
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            
+            const filteredTxs = txs.filter(t => new Date(t.time) > oneYearAgo);
+            
+            // Still cap at a reasonable number (e.g. 1000) to prevent localStorage issues
+            localStorage.setItem(txKey(userId), JSON.stringify(filteredTxs.slice(0, 1000)));
+        }
+
+        function renderBalance(userId) {
+            const bal = getBalance(userId);
+            document.getElementById('userBalance').textContent = formatMoney(bal);
+        }
+
+        function renderHistory(userId) {
+            let txs = getTxs(userId);
+            const container = document.getElementById('txHistory');
+            if (!container) return;
+
+            // Cleanup old history on render (keep 1 year)
+            const oneYearAgo = new Date();
+            oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+            const originalCount = txs.length;
+            txs = txs.filter(t => new Date(t.time) > oneYearAgo);
+            
+            if (txs.length !== originalCount) {
+                localStorage.setItem(txKey(userId), JSON.stringify(txs));
+            }
+
+            if (!txs.length) {
+                container.innerHTML = '<div class="text-slate-400">No transactions yet.</div>';
+                return;
+            }
+            container.innerHTML = txs.map(t => {
+                const d = new Date(t.time).toLocaleString();
+                const sign = t.type === 'withdraw' ? '-' : '+';
+                const cls = t.type === 'withdraw' ? 'text-red-400' : 'text-emerald-400';
+                const statusCls = t.status === 'pending' ? 'text-amber-500' : (t.status === 'completed' ? 'text-emerald-500' : 'text-slate-500');
+                return `
+                    <div class="py-2 border-b border-slate-800 flex justify-between">
+                        <div>
+                            <div class=\"${cls} font-bold\">${t.type.toUpperCase()}</div>
+                            <div class=\"text-slate-400 text-xs\">${d}</div>
+                            ${t.status ? `<div class=\"${statusCls} text-[8px] font-black uppercase tracking-widest mt-1\">${t.status}</div>` : ''}
+                        </div>
+                        <div class="text-right">
+                            <div class=\"font-bold\">${sign}${Number(t.amount).toFixed(2)}</div>
+                            <div class=\"text-slate-400 text-xs font-bold\">Bal ${Number(t.balance).toFixed(2)}</div>
+                        </div>
+                    </div>`;
+            }).join('');
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            let user;
+            try { user = await ensureAuth(); } catch { return; }
+
+            const userId = user.id || user.email;
+
+            const pageTitle = document.getElementById('pageTitle');
+            const cardTitle = document.getElementById('cardTitle');
+            const modeDemo = document.getElementById('modeDemo');
+            const modeReal = document.getElementById('modeReal');
+            const depositBtn = document.getElementById('depositBtn');
+            const setBalanceBtn = document.getElementById('setBalanceBtn');
+            const amountInput = document.getElementById('txAmount');
+            const txHashInput = document.getElementById('txHash');
+            const realDepositNetworks = document.getElementById('realDepositNetworks');
+            const addressSection = document.getElementById('addressSection');
+            const addressLabel = document.getElementById('addressLabel');
+            const depositAddress = document.getElementById('depositAddress');
+            const withdrawAddress = document.getElementById('withdrawAddress');
+            const networkWarning = document.getElementById('networkWarning');
+            const selectedNetworkName = document.getElementById('selectedNetworkName');
+            const selectedNetworkName2 = document.getElementById('selectedNetworkName2');
+            const selectedNetworkWarning = document.getElementById('selectedNetworkWarning');
+            const copyAddressBtn = document.getElementById('copyAddressBtn');
+
+            let activeAction = 'deposit'; // 'deposit' or 'withdraw'
+
+            const addresses = {
+                tron: 'TNV8mN5R3v9m7X6Wp9q5v2s7m8z4R1n2X',
+                eth: '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
+            };
+
+            function updateUIForMode() {
+                localStorage.setItem('surfer:currentMode', currentMode);
+                const isDemo = currentMode === 'demo';
+                
+                pageTitle.textContent = isDemo ? 'Demo Account' : 'Real Account';
+                cardTitle.textContent = isDemo ? 'Demo Trading Account' : 'Real Trading Account';
+                
+                if (isDemo) {
+                    modeDemo.className = 'px-2 py-0.5 rounded text-[8px] font-black uppercase border border-emerald-500 bg-emerald-500/10 text-emerald-500 transition-all';
+                    modeReal.className = 'px-2 py-0.5 rounded text-[8px] font-black uppercase border border-slate-700 bg-slate-800/50 text-slate-500 hover:border-rose-500 hover:text-rose-500 transition-all';
+                    depositBtn.classList.add('hidden');
+                    setBalanceBtn.classList.remove('hidden');
+                    realDepositNetworks.classList.add('hidden');
+                } else {
+                    modeReal.className = 'px-2 py-0.5 rounded text-[8px] font-black uppercase border border-rose-500 bg-rose-500/10 text-rose-500 transition-all';
+                    modeDemo.className = 'px-2 py-0.5 rounded text-[8px] font-black uppercase border border-slate-700 bg-slate-800/50 text-slate-500 hover:border-emerald-500 hover:text-emerald-500 transition-all';
+                    depositBtn.classList.remove('hidden');
+                    setBalanceBtn.classList.add('hidden');
+                    realDepositNetworks.classList.remove('hidden');
+                }
+
+                // Initialize balance if missing for this mode
+                if (localStorage.getItem(storageKey(userId)) === null) {
+                    setBalance(userId, 0);
+                }
+                
+                renderBalance(userId);
+                renderHistory(userId);
+            }
+
+            function updateAddressUI(net) {
+                const name = net === 'tron' ? 'TRC20' : 'ERC20';
+                selectedNetworkName.textContent = name;
+                selectedNetworkName2.textContent = name;
+                
+                if (activeAction === 'deposit') {
+                    addressLabel.textContent = `Deposit Address (${name})`;
+                    depositAddress.textContent = addresses[net];
+                    depositAddress.classList.remove('hidden');
+                    withdrawAddress.classList.add('hidden');
+                    copyAddressBtn.classList.remove('hidden');
+                    networkWarning.classList.remove('hidden');
+                } else {
+                    addressLabel.textContent = `Withdrawal Address (${name})`;
+                    depositAddress.classList.add('hidden');
+                    withdrawAddress.classList.remove('hidden');
+                    copyAddressBtn.classList.add('hidden');
+                    networkWarning.classList.add('hidden');
+                }
+                addressSection.classList.remove('hidden');
+            }
+
+            // Network selection logic
+            document.querySelectorAll('.network-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const net = btn.getAttribute('data-network');
+                    
+                    // Style active button
+                    document.querySelectorAll('.network-btn').forEach(b => b.classList.remove('border-indigo-500', 'text-indigo-400', 'bg-indigo-500/10'));
+                    btn.classList.add('border-indigo-500', 'text-indigo-400', 'bg-indigo-500/10');
+                    
+                    updateAddressUI(net);
+                });
+            });
+
+            copyAddressBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(depositAddress.textContent);
+                const originalSvg = copyAddressBtn.innerHTML;
+                copyAddressBtn.innerHTML = '<svg class="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>';
+                setTimeout(() => copyAddressBtn.innerHTML = originalSvg, 2000);
+            });
+
+            modeDemo.addEventListener('click', () => { currentMode = 'demo'; updateUIForMode(); });
+            modeReal.addEventListener('click', () => { currentMode = 'real'; updateUIForMode(); });
+
+            updateUIForMode();
+
+            const withdrawBtn = document.getElementById('withdrawBtn');
+
+            depositBtn.addEventListener('click', () => {
+                if (activeAction !== 'deposit') {
+                    activeAction = 'deposit';
+                    const activeNet = document.querySelector('.network-btn.border-indigo-500');
+                    if (activeNet) updateAddressUI(activeNet.getAttribute('data-network'));
+                    return;
+                }
+
+                const val = parseFloat(amountInput.value);
+                if (isNaN(val) || val <= 0) {
+                    alert('Please enter a valid deposit amount.');
+                    return;
+                }
+                
+                const activeNet = document.querySelector('.network-btn.border-indigo-500');
+                if (!activeNet) {
+                    alert('Please select a deposit network (Tron or Ethereum).');
+                    return;
+                }
+
+                const netName = activeNet.getAttribute('data-network') === 'tron' ? 'TRC20' : 'ERC20';
+                
+                if (!txHashInput.value.trim()) {
+                    alert('Please enter the Transaction Hash (TXID) to confirm your real money deposit.');
+                    return;
+                }
+
+                // Simulate processing
+                depositBtn.textContent = 'Verifying Transaction...';
+                depositBtn.disabled = true;
+                
+                setTimeout(() => {
+                    // For Real mode, we don't update balance immediately. 
+                    // We add a pending transaction and show a message.
+                    const currentBal = getBalance(userId);
+                    addTx(userId, 'deposit', val, currentBal, 'pending');
+                    
+                    renderBalance(userId);
+                    renderHistory(userId);
+                    amountInput.value = '';
+                    txHashInput.value = '';
+                    depositBtn.textContent = 'Confirm Deposit';
+                    depositBtn.disabled = false;
+                    alert(`Deposit request for ${formatMoney(val)} via ${netName} has been submitted! Our team will verify the transaction hash on the blockchain. Your balance will update once confirmed (usually 5-15 mins).`);
+                }, 2000);
+            });
+
+            setBalanceBtn.addEventListener('click', () => {
+                const val = parseFloat(amountInput.value);
+                if (isNaN(val) || val < 0) {
+                    alert('Please enter a valid balance amount.');
+                    return;
+                }
+                setBalance(userId, val);
+                addTx(userId, 'set', val, val);
+                renderBalance(userId);
+                renderHistory(userId);
+                amountInput.value = '';
+                alert(`Demo balance set to ${formatMoney(val)}`);
+            });
+
+            withdrawBtn.addEventListener('click', () => {
+                if (currentMode === 'real' && activeAction !== 'withdraw') {
+                    activeAction = 'withdraw';
+                    const activeNet = document.querySelector('.network-btn.border-indigo-500');
+                    if (activeNet) updateAddressUI(activeNet.getAttribute('data-network'));
+                    return;
+                }
+
+                const val = parseFloat(amountInput.value);
+                if (isNaN(val) || val <= 0) {
+                    alert('Please enter a valid amount.');
+                    return;
+                }
+                const currentBal = getBalance(userId);
+                if (val > currentBal) {
+                    alert('Insufficient balance.');
+                    return;
+                }
+
+                if (currentMode === 'real') {
+                    const activeNet = document.querySelector('.network-btn.border-indigo-500');
+                    if (!activeNet) {
+                        alert('Please select a network (Tron or Ethereum).');
+                        return;
+                    }
+                    if (!withdrawAddress.value.trim()) {
+                        alert('Please enter your withdrawal address.');
+                        return;
+                    }
+
+                    const netName = activeNet.getAttribute('data-network') === 'tron' ? 'TRC20' : 'ERC20';
+                    withdrawBtn.textContent = 'Processing...';
+                    withdrawBtn.disabled = true;
+
+                    setTimeout(() => {
+                        const newBal = currentBal - val;
+                        setBalance(userId, newBal);
+                        addTx(userId, 'withdraw', val, newBal);
+                        renderBalance(userId);
+                        renderHistory(userId);
+                        amountInput.value = '';
+                        withdrawAddress.value = '';
+                        withdrawBtn.textContent = 'Withdraw';
+                        withdrawBtn.disabled = false;
+                        alert(`Withdrawal of ${formatMoney(val)} via ${netName} is successful!`);
+                    }, 1500);
+                } else {
+                    const newBal = currentBal - val;
+                    setBalance(userId, newBal);
+                    addTx(userId, 'withdraw', val, newBal);
+                    renderBalance(userId);
+                    renderHistory(userId);
+                    amountInput.value = '';
+                }
+            });
+
+            // History toggle button
+            const showBtn = document.getElementById('showHistoryBtn');
+            const txContainer = document.getElementById('txHistory');
+            showBtn.addEventListener('click', () => {
+                if (txContainer.style.display === 'none' || !txContainer.style.display) {
+                    txContainer.style.display = 'block';
+                } else {
+                    txContainer.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
